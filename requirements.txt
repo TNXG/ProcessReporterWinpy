@@ -1,4 +1,4 @@
 PyYAML==6.0
 Requests==2.31.0
-winrt==1.0.21033.1
+winrt
 pyinstaller
