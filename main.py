@@ -59,13 +59,13 @@ def report(process_name, media_updata, api_key, api_url):
     print(response)
 
 
-async def main():
-    api_url, api_key, report_time = read_config()
+async def main(keywords_to_exclude):
+    api_url, api_key, report_time, keywords = read_config()
     while True:
         media_updata = {}
         media_info = await get_media_info()
         process_name, window_title = get_active_window_process_and_title()
-        if media_info:
+        if media_info and not any(keyword in media_info['title'] for keyword in keywords_to_exclude):
             media_updata['title'] = media_info['title']
             media_updata['artist'] = media_info['artist']
         report(process_name.replace('.exe', ''), media_updata, api_key, api_url)
@@ -79,8 +79,9 @@ def read_config():
     api_url = config['config']['api_url']
     api_key = config['config']['api_key']
     report_time = int(config['config']['report_time'])
-    return api_url, api_key, report_time
+    keywords = config['config']['keywords']
+    return api_url, api_key, report_time, keywords
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main(read_config()[3]))
