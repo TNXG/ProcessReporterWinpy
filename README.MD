@@ -33,8 +33,11 @@ python main.py
 在`config.yml`文件中填写配置项。
 
 ```bash
-processforwinpy.exe --path "--path "config.yml的路径"
+processforwinpy.exe --path "运行目录的路径"
 ```
+### 3. ProcessReporterWinpy Launcher
+我们提供了一个简单的启动器，您可以在[Releases页面](https://github.com/TNXG/ProcessReporterWinpy/releases)下载已发布的版本。
+ProcessReporterWinpy Launcher可以帮助您在后台运行ProcessReporterWinpy，最小化到托盘，而无需打开命令行窗口。
 
 ## 配置项
 
