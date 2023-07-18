@@ -21,10 +21,6 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Get Git SHA1
-        id: get_sha1
-        run: echo "::set-output name=sha1::$(git rev-parse HEAD)"
-
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
@@ -32,7 +28,7 @@ jobs:
 
       - name: Build Executable
         run: |
-          pyinstaller --onefile --version=${{ steps.get_sha1.outputs.sha1 }} main.py
+          pyinstaller --onefile main.py
           rename ./dist/main.exe processforwinpy.exe
 
       - name: Upload Release Asset
