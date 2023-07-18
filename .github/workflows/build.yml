@@ -17,25 +17,28 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.9
 
-      - name: Get version
+      - name: Get Git SHA1
         id: get_sha1
         run: echo "::set-output name=sha1::$(git rev-parse HEAD)"
 
-      - name: Install & Build & Publish
+      - name: Install Dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Build Executable
+        run: |
           pyinstaller --onefile --version=${{ steps.get_sha1.outputs.sha1 }} main.py
-          cp -r ./dist/main.exe ./dist/processforwinpy.exe
+          rename ./dist/main.exe processforwinpy.exe
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./dist/processforwinpy.exe
