@@ -3,6 +3,18 @@ import time
 import requests
 import ctypes
 import yaml
+import asyncio
+from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
+
+
+async def get_media_info():
+    sessions = await MediaManager.request_async()
+    current_session = sessions.get_current_session()
+    if current_session:
+        info = await current_session.try_get_media_properties_async()
+        info_dict = {song_attr: info.__getattribute__(song_attr) for song_attr in dir(info) if song_attr[0] != '_'}
+        info_dict['genres'] = list(info_dict['genres'])
+        return info_dict
 
 
 def get_active_window_process_and_title():
@@ -22,13 +34,20 @@ def get_active_window_process_and_title():
     return process_name.value, window_title.value
 
 
-def report(process_name, media_title, api_key, api_url):
+def report(process_name, media_updata, api_key, api_url):
     headers = {
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; TokaiTeio) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.82 iykrzu/114.514'
     }
     timestamp = int(time.time())
-    if media_title:
+    if media_updata:
+        updata = {
+            'timestamp': timestamp,
+            'process': process_name,
+            'media': {'title': media_updata['title'], 'artist': media_updata['artist']},
+            'key': api_key
+        }
+    else:
         updata = {
             'timestamp': timestamp,
             'process': process_name,
@@ -40,12 +59,16 @@ def report(process_name, media_title, api_key, api_url):
     print(response)
 
 
-def main():
+async def main():
     api_url, api_key, report_time = read_config()
     while True:
+        media_updata = {}
+        media_info = await get_media_info()
         process_name, window_title = get_active_window_process_and_title()
-        media_title = "None"  # Todo: 媒体标题获取
-        report(process_name.replace('.exe', ''), media_title, api_key, api_url)
+        if media_info:
+            media_updata['title'] = media_info['title']
+            media_updata['artist'] = media_info['artist']
+        report(process_name.replace('.exe', ''), media_updata, api_key, api_url)
         time.sleep(report_time)
 
 
@@ -60,4 +83,4 @@ def read_config():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
