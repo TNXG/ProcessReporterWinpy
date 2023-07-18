@@ -11,7 +11,7 @@ env:
 
 jobs:
   processforwinpy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -27,6 +27,7 @@ jobs:
 
       - name: Install & Build & Publish
         run: |
+          pip install --upgrade pip
           pip install -r requirements.txt
           pyinstaller --onefile --version=${{ steps.get_sha1.outputs.sha1 }} main.py
           cp -r ./dist/main.exe ./dist/processforwinpy.exe
