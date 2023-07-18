@@ -29,7 +29,7 @@ jobs:
       - name: Build Executable
         run: |
           pyinstaller --onefile main.py
-          rename ./dist/main.exe processforwinpy.exe
+          move .\dist\main.exe .\dist\processforwinpy.exe
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
