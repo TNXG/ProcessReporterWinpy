@@ -4,6 +4,7 @@ import requests
 import ctypes
 import yaml
 import asyncio
+import logging
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
 from argparse import ArgumentParser
 
@@ -11,6 +12,9 @@ parser = ArgumentParser()
 parser.add_argument("--path", help="指定配置项路径")
 args = parser.parse_args()
 path = args.path
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
+                    filename=path + '/' + time.strftime("%Y-%m-%d", time.localtime()) + '.log')
 
 
 async def get_media_info():
@@ -62,6 +66,7 @@ def report(process_name, media_updata, api_key, api_url):
 
     response = requests.post(api_url, json=updata, headers=headers)
     response = response.json()
+    logging.info(response)
     print(response)
 
 
@@ -82,6 +87,8 @@ def read_config():
     global path
     if not path:
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
+    else:
+        path = os.path.join(path, 'config.yml')
     with open(path, 'r', encoding='utf-8') as file:
         config = yaml.safe_load(file)
     api_url = config['config']['api_url']
