@@ -1,0 +1,4 @@
+config:
+  api_url: 'apiurl' # https://api.example.com/api/v2/ps/update
+  api_key: 'apikey' # 设置的key
+  report_time: '10' # 上报时间间隔，单位秒
