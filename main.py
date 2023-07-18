@@ -5,6 +5,12 @@ import ctypes
 import yaml
 import asyncio
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument("--path", help="指定配置项路径")
+args = parser.parse_args()
+path = args.path
 
 
 async def get_media_info():
@@ -73,8 +79,10 @@ async def main(keywords_to_exclude):
 
 
 def read_config():
-    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
-    with open(config_path, 'r', encoding='utf-8') as file:
+    global path
+    if not path:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
+    with open(path, 'r', encoding='utf-8') as file:
         config = yaml.safe_load(file)
     api_url = config['config']['api_url']
     api_key = config['config']['api_key']

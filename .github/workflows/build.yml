@@ -1,0 +1,42 @@
+name: processforwinpy build exe
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  processforwinpy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Get version
+        id: get_sha1
+        run: echo "::set-output name=sha1::$(git rev-parse HEAD)"
+
+      - name: Install & Build & Publish
+        run: |
+          pip install -r requirements.txt
+          pyinstaller --onefile --version=${{ steps.get_sha1.outputs.sha1 }} main.py
+          cp -r ./dist/main.exe ./dist/processforwinpy.exe
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/processforwinpy.exe
+          asset_name: processforwinpy.exe
+          asset_content_type: application/octet-stream
