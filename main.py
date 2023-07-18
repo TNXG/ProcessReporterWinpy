@@ -13,8 +13,11 @@ parser.add_argument("--path", help="指定配置项路径")
 args = parser.parse_args()
 path = args.path
 
+if not os.path.exists(path + '/logs/'):
+    os.makedirs(path + '/logs/')
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
-                    filename=os.path.join(path, f"{time.strftime('%Y-%m-%d', time.localtime())}.log"))
+                    filename=os.path.join(path + '/logs/', f"{time.strftime('%Y-%m-%d', time.localtime())}.log"))
 
 
 async def get_media_info():
@@ -58,15 +61,19 @@ def report(process_name, media_update, api_key, api_url):
             'process': process_name,
             'key': api_key
         }
-
-    response = requests.post(api_url, json=update_data, headers=headers)
-    response = response.json()
-    logging.info(response)
-    print(response)
+    try:
+        # 发送post请求，5秒超时
+        response = requests.post(api_url, json=update_data, headers=headers, timeout=5)
+        response = response.json()
+        logging.info(response)
+        print(response)
+    except Exception as e:
+        logging.error(e)
+        print(e)
 
 
 async def main(keywords_to_exclude):
-    api_url, api_key, report_time, keywords = read_config(path)
+    api_url, api_key, report_time, keywords, replace, replace_to = read_config(path)
     while True:
         media_update = {}
         media_info = await get_media_info()
@@ -74,7 +81,13 @@ async def main(keywords_to_exclude):
         if media_info and not any(keyword in media_info['title'] for keyword in keywords_to_exclude):
             media_update['title'] = media_info['title']
             media_update['artist'] = media_info['artist']
-        report(process_name.replace('.exe', ''), media_update, api_key, api_url)
+        process_name = process_name.replace('.exe', '')
+        # 替换process_name
+        for i in range(len(replace)):
+            if process_name == replace[i]:
+                process_name = replace_to[i]
+                break
+        report(process_name, media_update, api_key, api_url)
         await asyncio.sleep(report_time)
 
 
@@ -89,7 +102,9 @@ def read_config(config_path):
     api_key = config['config']['api_key']
     report_time = int(config['config']['report_time'])
     keywords = config['config']['keywords']
-    return api_url, api_key, report_time, keywords
+    process_replace = config['config']['replace']
+    process_replace_to = config['config']['replace_to']
+    return api_url, api_key, report_time, keywords, process_replace, process_replace_to
 
 
 if __name__ == "__main__":
