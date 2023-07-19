@@ -3,15 +3,21 @@ import time
 import requests
 import ctypes
 import yaml
+import sys
 import asyncio
 import logging
+
 from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
 from argparse import ArgumentParser
+from core.search import search
 
 parser = ArgumentParser()
 parser.add_argument("--path", help="指定配置项路径")
 args = parser.parse_args()
 path = args.path
+
+if not path:
+    path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 if not os.path.exists(path + '/logs/'):
     os.makedirs(path + '/logs/')
@@ -78,6 +84,11 @@ async def main(keywords_to_exclude):
         media_update = {}
         media_info = await get_media_info()
         process_name, window_title = get_active_window_process_and_title()
+        # 搜索cloudmusic.exe
+        cloudmusic = search('cloudmusic.exe')
+        if cloudmusic:
+            media_update['title'] = cloudmusic.split(' - ')[0]
+            media_update['artist'] = cloudmusic.split(' - ')[1]
         if media_info and not any(keyword in media_info['title'] for keyword in keywords_to_exclude):
             media_update['title'] = media_info['title']
             media_update['artist'] = media_info['artist']
