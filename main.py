@@ -81,25 +81,29 @@ def report(process_name, media_update, api_key, api_url):
 async def main(keywords_to_exclude):
     api_url, api_key, report_time, keywords, replace, replace_to = read_config(path)
     while True:
-        media_update = {}
-        media_info = await get_media_info()
-        process_name, window_title = get_active_window_process_and_title()
-        # 搜索cloudmusic.exe
-        cloudmusic = search('cloudmusic.exe')
-        if cloudmusic:
-            media_update['title'] = cloudmusic.split(' - ')[0]
-            media_update['artist'] = cloudmusic.split(' - ')[1]
-        if media_info and not any(keyword in media_info['title'] for keyword in keywords_to_exclude):
-            media_update['title'] = media_info['title']
-            media_update['artist'] = media_info['artist']
-        process_name = process_name.replace('.exe', '')
-        # 替换process_name
-        for i in range(len(replace)):
-            if process_name == replace[i]:
-                process_name = replace_to[i]
-                break
-        report(process_name, media_update, api_key, api_url)
-        await asyncio.sleep(report_time)
+        try:
+            media_update = {}
+            media_info = await get_media_info()
+            process_name, window_title = get_active_window_process_and_title()
+            # 搜索cloudmusic.exe
+            cloudmusic = search('cloudmusic.exe')
+            if cloudmusic:
+                media_update['title'] = cloudmusic.split(' - ')[0]
+                media_update['artist'] = cloudmusic.split(' - ')[1]
+            if media_info and not any(keyword in media_info['title'] for keyword in keywords_to_exclude):
+                media_update['title'] = media_info['title']
+                media_update['artist'] = media_info['artist']
+            process_name = process_name.replace('.exe', '')
+            # 替换process_name
+            for i in range(len(replace)):
+                if process_name == replace[i]:
+                    process_name = replace_to[i]
+                    break
+            report(process_name, media_update, api_key, api_url)
+            await asyncio.sleep(report_time)
+        except Exception as e:
+            logging.error(e)
+            print(e)
 
 
 def read_config(config_path):
