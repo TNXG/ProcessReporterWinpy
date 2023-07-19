@@ -85,11 +85,14 @@ async def main(keywords_to_exclude):
             media_update = {}
             media_info = await get_media_info()
             process_name, window_title = get_active_window_process_and_title()
-            # 搜索cloudmusic.exe
             cloudmusic = search('cloudmusic.exe')
             if cloudmusic:
-                media_update['title'] = cloudmusic.split(' - ')[0]
-                media_update['artist'] = cloudmusic.split(' - ')[1]
+                if ' - ' in cloudmusic:
+                    media_update['title'] = cloudmusic.split(' - ')[0]
+                    media_update['artist'] = cloudmusic.split(' - ')[1]
+                else:
+                    media_update['title'] = cloudmusic
+                    media_update['artist'] = None
             if media_info and not any(keyword in media_info['title'] for keyword in keywords_to_exclude):
                 media_update['title'] = media_info['title']
                 media_update['artist'] = media_info['artist']

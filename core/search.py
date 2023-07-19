@@ -66,6 +66,5 @@ def search(*args):
     for pid, name in procs:
         data = enum_process_windows(pid)
         if data:
-            proc_text = "PId {0:d}{1:s}windows:".format(pid, " (File: [{0:s}]) ".format(name) if name else " ")
             for handle, text in data:
                 return text
