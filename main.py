@@ -97,6 +97,9 @@ async def main(keywords_to_exclude):
                 media_update['title'] = media_info['title']
                 media_update['artist'] = media_info['artist']
             process_name = process_name.replace('.exe', '')
+            # 如果process_name为空，使用window_title
+            if not process_name:
+                process_name = window_title
             # 替换process_name
             for i in range(len(replace)):
                 if process_name == replace[i]:
