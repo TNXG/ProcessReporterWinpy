@@ -5,10 +5,12 @@ config:
   keywords: # 关键词屏蔽，数组形式
     - 'pronhub'
 
-  # replace的第一行与replace_to的第一行对应，以此类推，msedge会被替换为Chrome，idea64会被替换为Code
+  # replace的第一行与replace_to的第一行对应，以此类推，`cloudmusic`会被替换为`网易云音乐`，`msedge`会被替换为`Microsoft Edge`
+  # 请不要删除配置项中默认替换的项目
+  # 更多替换项查看`Innei/Shiro/blob/main/src/components/layout/header/internal/Activity.tsx`
   replace:
+    - 'cloudmusic'
     - 'msedge'
-    - 'idea64'
   replace_to:
-    - 'Chrome'
-    - 'Code'
+    - '网易云音乐'
+    - 'Microsoft Edge'
