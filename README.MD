@@ -20,7 +20,7 @@ cd ProcessReporterWinpy
 pip install -r requirements.txt
 ```
 
-在`config.yml`文件中填写配置项。
+将`example_config.yml`重命名为 `config.yml`，并在`config.yml`文件中填写配置项。
 
 然后运行`main.py`即可：
 
@@ -32,7 +32,7 @@ python main.py --path "运行目录的路径"
 
 您可以从 [Releases页面](https://github.com/TNXG/ProcessReporterWinpy/releases) 下载已发布的版本。
 
-在`config.yml`文件中填写配置项。
+将`example_config.yml`重命名为 `config.yml`，并在`config.yml`文件中填写配置项。
 
 ```bash
 processforwinpy.exe --path "运行目录的路径"
@@ -47,7 +47,7 @@ ProcessReporterWinpy Launcher 可以帮助您在后台运行 ProcessReporterWinp
 
 ## 配置项
 
-在 `config.yml` 文件中，您可以配置以下选项：
+将`example_config.yml`重命名为 `config.yml`，并在`config.yml`文件中填写配置项。
 
 ```yaml
 config:

@@ -1,0 +1,16 @@
+config:
+  api_url: 'apiurl' # https://api.example.com/api/v2/fn/ps/update
+  api_key: 'apikey' # 设置的key
+  report_time: '10' # 上报时间间隔，单位秒
+  keywords: # 关键词屏蔽，数组形式
+    - 'pronhub'
+
+  # replace的第一行与replace_to的第一行对应，以此类推，`cloudmusic`会被替换为`网易云音乐`，`msedge`会被替换为`Microsoft Edge`
+  # 请不要删除配置项中默认替换的项目
+  # 更多替换项查看`Innei/Shiro/blob/main/src/components/layout/header/internal/Activity.tsx`
+  replace:
+    - 'cloudmusic'
+    - 'msedge'
+  replace_to:
+    - '网易云音乐'
+    - 'Microsoft Edge'

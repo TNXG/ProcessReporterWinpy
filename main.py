@@ -1,15 +1,15 @@
+from core.replace import replace_process_name
+from core.upload import report
+from core.get_process_name import get_active_window_process_and_title
+from core.get_media_info import get_media_info
+from argparse import ArgumentParser
+
 import os
-import time
-import requests
-import ctypes
-import yaml
 import sys
+import yaml
+import time
 import asyncio
 import logging
-
-from winrt.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
-from argparse import ArgumentParser
-from core.search import search
 
 parser = ArgumentParser()
 parser.add_argument("--path", help="指定配置项路径")
@@ -26,95 +26,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
                     filename=os.path.join(path + '/logs/', f"{time.strftime('%Y-%m-%d', time.localtime())}.log"))
 
 
-async def get_media_info():
-    sessions = await MediaManager.request_async()
-    current_session = sessions.get_current_session()
-    if current_session:
-        info = await current_session.try_get_media_properties_async()
-        info_dict = {song_attr: getattr(info, song_attr) for song_attr in dir(info) if not song_attr.startswith('_')}
-        info_dict['genres'] = list(info_dict['genres'])
-        return info_dict
-
-
-def get_active_window_process_and_title():
-    hwnd = ctypes.windll.user32.GetForegroundWindow()
-    window_title = ctypes.create_unicode_buffer(255)
-    ctypes.windll.user32.GetWindowTextW(hwnd, window_title, ctypes.sizeof(window_title))
-    process_id = ctypes.c_ulong()
-    ctypes.windll.user32.GetWindowThreadProcessId(hwnd, ctypes.byref(process_id))
-    process_handle = ctypes.windll.kernel32.OpenProcess(0x0400 | 0x0010, False, process_id.value)
-    process_name = ctypes.create_unicode_buffer(255)
-    ctypes.windll.psapi.GetModuleBaseNameW(process_handle, None, process_name, ctypes.sizeof(process_name))
-    return process_name.value, window_title.value
-
-
-def report(process_name, media_update, api_key, api_url):
-    headers = {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; TokaiTeio) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.82 iykrzu/114.514'
-    }
-    timestamp = int(time.time())
-    if media_update:
-        update_data = {
-            'timestamp': timestamp,
-            'process': process_name,
-            'media': {'title': media_update['title'], 'artist': media_update['artist']},
-            'key': api_key
-        }
-    else:
-        update_data = {
-            'timestamp': timestamp,
-            'process': process_name,
-            'key': api_key
-        }
-    try:
-        # 发送post请求，5秒超时
-        response = requests.post(api_url, json=update_data, headers=headers, timeout=5)
-        response = response.json()
-        logging.info(response)
-        print(response)
-    except Exception as e:
-        logging.error(e)
-        print(e)
-
-
-async def main(keywords_to_exclude):
-    api_url, api_key, report_time, keywords, replace, replace_to = read_config(path)
-    while True:
-        try:
-            media_update = {}
-            media_info = await get_media_info()
-            process_name, window_title = get_active_window_process_and_title()
-            cloudmusic = search('cloudmusic.exe')
-            if cloudmusic:
-                if ' - ' in cloudmusic:
-                    media_update['title'] = cloudmusic.split(' - ')[0]
-                    media_update['artist'] = cloudmusic.split(' - ')[1]
-                else:
-                    media_update['title'] = cloudmusic
-                    media_update['artist'] = None
-            if media_info and not any(keyword in media_info['title'] for keyword in keywords_to_exclude):
-                media_update['title'] = media_info['title']
-                media_update['artist'] = media_info['artist']
-            process_name = process_name.replace('.exe', '')
-            # 如果process_name为空，使用window_title
-            if not process_name:
-                process_name = window_title
-            # 替换process_name
-            for i in range(len(replace)):
-                if process_name == replace[i]:
-                    process_name = replace_to[i]
-                    break
-            report(process_name, media_update, api_key, api_url)
-            await asyncio.sleep(report_time)
-        except Exception as e:
-            logging.error(e)
-            print(e)
-
-
-def read_config(config_path):
+def read_config(config_path=None):
     if not config_path:
-        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yml')
+        config_path = os.path.join(os.path.dirname(
+            os.path.abspath(__file__)), 'config.yml')
     else:
         config_path = os.path.join(config_path, 'config.yml')
     with open(config_path, 'r', encoding='utf-8') as file:
@@ -128,5 +43,31 @@ def read_config(config_path):
     return api_url, api_key, report_time, keywords, process_replace, process_replace_to
 
 
+async def main():
+    media_update = {}
+    # 读取配置文件
+    api_url, api_key, report_time, keywords, process_replace, process_replace_to = read_config()
+    # 获取当前活动窗口的进程名和标题
+    process_name, window_title = get_active_window_process_and_title()
+    # 如果process_name为空，使用window_title
+    if not process_name:
+        process_name = window_title
+    # 将exe干掉
+    process_name = process_name.replace('.exe', '')
+    # 替换进程名
+    process_name = replace_process_name(
+        process_name, process_replace, process_replace_to)
+    # 获取媒体信息
+    media_info = await get_media_info()
+    if media_info and not any(keyword in media_info['title'] for keyword in keywords):
+        media_update['title'] = media_info['title']
+        media_update['artist'] = media_info['artist']
+    # 上传信息
+    report(process_name, media_info, api_key, api_url)
+    # 休息report_time秒
+    await asyncio.sleep(report_time)
+
 if __name__ == "__main__":
-    asyncio.run(main(read_config(path)[3]))
+    # 无数次的运行！
+    while True:
+        asyncio.run(main())

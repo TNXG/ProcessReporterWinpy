@@ -1,5 +1,4 @@
-pywin32==306
-PyYAML==6.0
-PyYAML==6.0.1
-Requests==2.31.0
-winrt==1.0.21033.1
+pywin32
+PyYAML
+Requests
+winrt
