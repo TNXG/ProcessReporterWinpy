@@ -14,3 +14,8 @@ config:
   replace_to:
     - '网易云音乐'
     - 'Microsoft Edge'
+  
+  special:
+    netease_autu_report:
+      enable: true # 是否启用
+      userid: 123456 # 网易云用户id
