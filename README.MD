@@ -2,6 +2,8 @@
 
 Process Reporter for Winpy 是一个使用Python开发的Windows应用程序。它旨在实时报告当前用户在PC上正在使用的前台应用程序的名称，以及正在播放的任何媒体信息，并将报告发送到 [Shiro](https://github.com/Innei/Shiro)。
 
+# **！！！ProcessReporterWinpy的易语言启动器生成的配置项为过时内容，请参照本文档进行配置！！！**
+
 该程序的实现借鉴了 [Linux版本](https://github.com/ttimochan/processforlinux) 的报告程序。
 
 [获取媒体播放信息](https://stackoverflow.com/questions/65011660/how-can-i-get-the-title-of-the-currently-playing-media-in-windows-10-with-python)
