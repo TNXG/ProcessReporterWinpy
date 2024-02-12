@@ -1,7 +1,6 @@
 from core.replace import replace_process_name
 from core.upload import report
 from core.search import search
-from core.neteasemusic_autocheck import autocheck_ncm, get_ncmmusicmessage
 from core.get_process_name import get_active_window_process_and_title
 from core.get_media_info import get_media_info
 from argparse import ArgumentParser
@@ -54,13 +53,13 @@ def read_config(config_path=None):
     netease_autu_report_enable = config['config']['special']['netease_autu_report']['enable']
     netease_autu_report_cookies = config['config']['special']['netease_autu_report']['cookies']
     netease_autu_report_apiurl = config['config']['special']['netease_autu_report']['api_url']
-    return api_url, api_key, report_time, keywords, process_replace, process_replace_to, netease_autu_report_enable, netease_autu_report_apiurl, netease_autu_report_cookies
+    return api_url, api_key, report_time, keywords, process_replace, process_replace_to
 
 
 async def main():
     media_update = {}
     # 读取配置文件
-    api_url, api_key, report_time, keywords, process_replace, process_replace_to, netease_autu_report_enable, netease_autu_report_apiurl, netease_autu_report_cookies = read_config()
+    api_url, api_key, report_time, keywords, process_replace, process_replace_to = read_config()
     # 获取当前活动窗口的进程名和标题
     process_name, window_title = get_active_window_process_and_title()
     # 如果process_name为空，使用window_title
@@ -84,56 +83,6 @@ async def main():
         else:
             media_update['title'] = cloudmusic
             media_update['artist'] = None
-
-    global first_play
-    if netease_autu_report_enable:
-        old_returnid = None
-        old_time = None
-        play_status = False
-        # 获取id
-        returnid = autocheck_ncm(
-            netease_autu_report_apiurl, netease_autu_report_cookies)
-        # 检测是否存在缓存文件
-        if not os.path.exists(path + '/cache/ncm_returnid.cache'):
-            with open(path + '/cache/ncm_returnid.cache', 'w') as f:
-                f.write(returnid)
-            with open(path + '/cache/ncm_time.cache', 'w') as f:
-                f.write(str(int(time.time())))
-
-        with open(path + '/cache/ncm_returnid.cache', 'r') as f:
-            old_returnid = f.read()
-        with open(path + '/cache/ncm_time.cache', 'r') as f:
-            old_time = f.read()
-            # 如果5min内id没有变化，就不上传
-        print(returnid, old_returnid)
-        if returnid != old_returnid:
-            first_play = False
-        if first_play:
-            play_status = False
-        elif returnid == old_returnid and int(time.time()) - int(old_time) > 300:
-            play_status = False
-        else:
-            play_status = True
-        if returnid == old_returnid:
-            print('id相同')
-        else:
-            print('id不同')
-    if returnid != old_returnid:
-        with open(path + '/cache/ncm_returnid.cache', 'w') as f:
-            f.write(returnid)
-        with open(path + '/cache/ncm_time.cache', 'w') as f:
-            f.write(str(int(time.time())))
-    if play_status:
-        media_update['title'], media_update['artist'] = get_ncmmusicmessage(
-            netease_autu_report_apiurl, returnid)
-    else:
-        # 如果id改变了则重置
-        with open(path + '/cache/ncm_returnid.cache', 'w') as f:
-            f.write(returnid)
-        with open(path + '/cache/ncm_time.cache', 'w') as f:
-            f.write(str(int(time.time())))
-    print(play_status, media_update)
-    # 如果
     # 上传信息
     report(process_name, media_update, api_key, api_url)
     # 休息report_time秒
