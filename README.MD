@@ -1,8 +1,10 @@
+**此项目已停止维护，请使用现在仍处于维护状态的[TNXG/Kizuna](https://github.com/TNXG/Kizuna)，或者是[ChingCdesu/ShiroProcessReporter](https://github.com/ChingCdesu/ShiroProcessReporter)和[Innei/ProcessReporterCli](https://github.com/Innei/ProcessReporterCli)**
+
 # Process Reporter For Windows Python
 
 Process Reporter for Winpy 是一个使用Python开发的Windows应用程序。它旨在实时报告当前用户在PC上正在使用的前台应用程序的名称，以及正在播放的任何媒体信息，并将报告发送到 [Shiro](https://github.com/Innei/Shiro)。
 
-# **！！！ProcessReporterWinpy的易语言启动器生成的配置项为过时内容，请参照本文档进行配置！！！**
+**！！！ProcessReporterWinpy的易语言启动器生成的配置项为过时内容，请参照本文档进行配置！！！**
 
 该程序的实现借鉴了 [Linux版本](https://github.com/ttimochan/processforlinux) 的报告程序。
 
